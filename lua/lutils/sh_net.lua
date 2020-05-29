@@ -77,6 +77,7 @@ net.Receive("lutils", function(len, ply)
 		end
 
 		if SERVER then
+			compTbl.settings["Who"] = ply
 			_net.SendRequest(compTbl.code, compTbl.targets, compTbl.settings)
 		else
 			handleRequests(compTbl.code, compTbl.targets, compTbl.settings)
@@ -84,7 +85,7 @@ net.Receive("lutils", function(len, ply)
 	elseif msgType == MsgID.Print and SERVER then
 		local sessId = net.ReadUInt(32)
 		local session = _net.PrintSessions[sessId] or {}
-
+		
 		if session[ply] then
 			MsgC(Color(247, 188, 126), string.format("[%s (%s)]\n", ply:Name(), ply:SteamID()))
 			session[ply] = nil

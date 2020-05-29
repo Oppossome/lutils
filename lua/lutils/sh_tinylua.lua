@@ -130,20 +130,13 @@ tinylua.Wrap = Wrap
 tinylua.pack = pack
 
 -- INTERNAL Extensions
-local keywords = {"for", "while", "if", "repeat", "return"}
 function tinylua.MakePrefix(input)
-	local toEval = string.format(" %s ", input)
-	if not toEval:match("[<>=~!]=") and toEval:match("=") then return input end
-	
-	for _, keyword in pairs(keywords) do 
-		if toEval:match("%W"..keyword.."%W") then
-			return input
-		end
+	if not input:match("\n") and isfunction(CompileString("return "..input, "", false)) then
+		return "return "..input
 	end
 
-	return "return "..input
+	return input
 end
-
 
 local function buildParser(input)
 	if isfunction(input) then return input end
@@ -270,6 +263,7 @@ function tinylua.FindEntity(input, upvalues)
 end
 
 function tinylua.BuildUpvalues(ply)
+	if not IsValid(ply) then return {} end
 	local upvalues, trace = {}, ply:GetEyeTrace()
 
 	upvalues.me		= ply
@@ -287,7 +281,7 @@ function tinylua.BuildUpvalues(ply)
 end
 
 hook.Add("LuaExecute", "tinylua", function(stage, settings, upvalues)
-	if settings.Who and stage == lutils.Stages.Before then
+	if not settings.NoTiny and stage == lutils.Stages.Before then
 		for ind, val in pairs(tinylua.BuildUpvalues(settings.Who))do
 			upvalues[ind] = val
 		end

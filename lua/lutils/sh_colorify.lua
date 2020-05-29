@@ -160,7 +160,7 @@ keywordColors["false"] = NUMBER
 keywordColors["true"] = NUMBER
 keywordColors["nil"] = NUMBER
 
-registerParser("%w+", function(parseData, text, id, match)
+registerParser("[%w_]+", function(parseData, text, id, match)
 	local targetColor = (keywordColors[match] ~= nil and keywordColors[match] or GLOBAL)
 	parseData.Append(targetColor, match)
 	return true
