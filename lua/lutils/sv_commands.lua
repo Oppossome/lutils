@@ -27,7 +27,7 @@ local function processBody(ply, context, body, isPrinting)
 		return results, code, tStr
 	elseif context == lutils.Contexts.SERVER then
 		return {true}, body, "Server"
-	elseif context == lutils.Contexts.SELF then
+	elseif IsValid(ply) and context == lutils.Contexts.SELF then
 		return {ply}, body, "Self"
 	elseif context == lutils.Contexts.SHARED then
 		local targets = {true, unpack(player.GetAll())}
@@ -37,31 +37,48 @@ end
 
 local PRINT = Color(245, 177, 212)
 local BASIC = Color(174, 174, 174)
-hook.Add("PlayerSay", "lutils", function(ply, msg)
+local function executeCommand(ply, msg)
 	local cmd, body = msg:match("^[./#!](%w+) (.+)")
-	if not cmd or not body then  return  end
-	local cmdData = cmds[cmd:lower()]
+	if not body then return end
 
-	if cmdData then
-		local context, isPrinting = cmdData[1], cmdData[2]
+	local context, doPrint = unpack(cmds[cmd:lower()] or {})
+	if context and (not IsValid(ply) or hook.Run("CanRunLua", ply, context)) then
+		local players, code, tStr = processBody(ply, context, body)
+		if not players then return end
 
-		if hook.Run("CanRunLua", ply, context) then
-			local players, code, tStr = processBody(ply, context, body)
-			lutils.net.BroadcastMessage(ply, "@", (isPrinting and PRINT or BASIC), tStr, ": ", unpack(lutils.colorify(code, true)))
-
-			local settings = { ["Who"] = ply, ["printid"] = lutils.net.NewSession(players, isPrinting) }
-			if isPrinting then code = tinylua.MakePrefix(code) end
-			lutils.ExecuteCode(code, players, settings)
-			return true
+		if IsValid(ply) then
+			lutils.BroadcastMessage(ply, "@", (doPrint and PRINT or BASIC), tStr, ": ", unpack(lutils.colorify(code, true)))
 		end
+
+		local settings = { ["Who"] = (IsValid(ply) and ply or nil),
+			["PrintSess"] = lutils.PrintSession(players, doPrint)}
+
+		if doPrint then code = tinylua.MakePrefix(code) end
+		lutils.Execute(code, players, settings)
+		return true
 	end
-end)
+end
+
+hook.Add("PlayerSay", "lutils", executeCommand)
+
+for cmd, cmdData in pairs(cmds) do
+	if cmdData[1] ~= lutils.Contexts.SELF then
+		local cmdStr = "!"..cmd
+		concommand.Add(cmdStr, function(ply, _, _, argStr)
+			if not IsValid(ply) then
+				executeCommand(nil, cmdStr.." "..argStr)
+			end
+		end)
+	end
+end
 
 local canLocal = GetConVar("sv_allowcslua")
 hook.Add("CanRunLua", "lutils", function(ply, context)
 	if ply:IsAdmin() or ply:IsSuperAdmin() then
 		return true
-	elseif context == lutils.Contexts.SELF and canLocal:GetBool() then
+	end
+	
+	if context == lutils.Contexts.SELF and canLocal:GetBool() then
 		return true
 	end
 end)

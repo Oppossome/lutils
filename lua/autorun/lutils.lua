@@ -23,6 +23,14 @@ do
 
 		return makeProxy(path, upvalues)
 	end
+
+	function lutils.Enum(...)
+		local result = {}
+		for ind, val in pairs({...})do
+			result[val] = ind
+		end
+		return result
+	end
 end
 
 local function aInclude(target)
@@ -39,7 +47,6 @@ end
 
 aInclude("lutils/sh_colorify.lua")
 aInclude("lutils/sh_stringify.lua")
-aInclude("lutils/sh_net.lua")
 aInclude("lutils/sh_lutils.lua")
 aInclude("lutils/sh_tinylua.lua")
 aInclude("lutils/sv_commands.lua")

@@ -70,7 +70,7 @@ local FUNCTION 	= Color(143, 161, 179)
 local CSTYLE	= Color(191, 97,  106)
 
 registerParser("!!READ%((.-),(.-),(.-)%)!!", function(parseData, text, id, match, file, first, last)
-	if SERVER then return lutils.prettyprint.stringify.ReadFunction(file, tonumber(first), tonumber(last)) end
+	if SERVER then return lutils.stringify.ReadFunction(file, tonumber(first), tonumber(last)) end
 end)
 
 registerParser("!!CLR%((.-),(.-),(.-),(.-)%)!!", function(parseData, text, id, match, red, green, blue, alpha)
