@@ -147,8 +147,8 @@ function lutils.Execute(code, players, settings)
 	end
 end
 
-function lutils.Server.PrintSession(players, doPrint)
-	if not doPrint or (#players <= 1 and players[1] == true) then return true end
+function lutils.Server.PrintSession(players)
+	if #players <= 1 and players[1] == true then return true end
 	local plys = {}
 	for _, ply in pairs(players) do
 		if IsEntity(ply) then

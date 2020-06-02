@@ -50,8 +50,9 @@ local function executeCommand(ply, msg)
 			lutils.BroadcastMessage(ply, "@", (doPrint and PRINT or BASIC), tStr, ": ", unpack(lutils.colorify(code, true)))
 		end
 
-		local settings = { ["Who"] = (IsValid(ply) and ply or nil),
-			["PrintSess"] = lutils.PrintSession(players, doPrint)}
+		local settings = {}
+		settings.Who = (IsValid(ply) and ply or nil)
+		settings.PrintSess = doPrint and lutils.PrintSession(players) or nil
 
 		if doPrint then code = tinylua.MakePrefix(code) end
 		lutils.Execute(code, players, settings)
