@@ -209,6 +209,10 @@ function INTERNAL:first()
 	end
 end
 
+function INTERNAL:IsValid()
+	return false
+end
+
 function INTERNAL:errors()
 	return (getStorage(self).errors or {})
 end

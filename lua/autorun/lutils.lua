@@ -45,8 +45,13 @@ local function aInclude(target)
 	end
 end
 
-aInclude("lutils/sh_colorify.lua")
-aInclude("lutils/sh_stringify.lua")
+aInclude("lutils/prettify/sh_colorify.lua")
+aInclude("lutils/prettify/sh_stringify.lua")
 aInclude("lutils/sh_lutils.lua")
 aInclude("lutils/sh_tinylua.lua")
 aInclude("lutils/sv_commands.lua")
+
+local extPath = "lutils/extensions/"
+for _, file in ipairs(file.Find(extPath.."*.lua", "LUA")) do
+	aInclude(extPath..file)
+end

@@ -3,10 +3,9 @@ local lutils = lutils.MakeNamespace("lutils")
 local NETID = lutils.Enum("Print", "Send")
 
 local function networkRequest(code, players, settings)
-	local target = (CLIENT and LocalPlayer() or true)
-	if table.HasValue(players, target) then
-		table.RemoveByValue(players, target)
+	if SERVER and table.HasValue(players, true) then
 		lutils.Execute(code, nil, settings)
+		table.RemoveByValue(players, true)
 		if table.Count(players) == 0 then
 			return
 		end
@@ -26,8 +25,8 @@ local function networkRequest(code, players, settings)
 	end
 	
 	table.RemoveByValue(players, true)
-	local requestStr	= util.TableToJSON(request)
-	local requestComp	= util.Compress(requestStr)
+	local requestStr = util.TableToJSON(request)
+	local requestComp = util.Compress(requestStr)
 
 	net.Start("lutils")
 	net.WriteUInt(NETID.Send, 3)
@@ -49,8 +48,12 @@ net.Receive("lutils", function(len, ply)
 		local players, settings = {}, {}
 
 		for ind, val in ipairs(reqTbl.players) do
-			local matched = tonumber(val:match("_(%d+)"))
-			players[ind] = (matched and Player(matched) or true)
+			if isstring(val) then
+				local matched = tonumber(val:match("_(%d+)"))
+				players[ind] = (matched and Player(matched) or true)
+			else
+				players[ind] = val
+			end
 		end
 
 		for ind, val in pairs(reqTbl.settings) do
@@ -63,7 +66,8 @@ net.Receive("lutils", function(len, ply)
 		end
 
 		if SERVER then settings.Who = ply end
-		lutils.Execute(reqTbl.code, players, settings)
+		local targets = SERVER and players or nil
+		lutils.Execute(reqTbl.code, targets, settings)
 	elseif netId == NETID.Print and SERVER then
 		local sessId = net.ReadUInt(16)
 		local sess = lutils.PrintSessions[sessId]
@@ -75,7 +79,7 @@ net.Receive("lutils", function(len, ply)
 				sess[ply] = nil
 			end
 
-			MsgC(Color(247, 188, 126), string.format("[%s (%s)]\n", ply:Name(), ply:SteamID()))
+			MsgC(Color(247, 188, 126), string.format("\n[%s (%s)]\n", ply:Name(), ply:SteamID()))
 
 			for i = 1, 15 do
 				local compLen = net.ReadUInt(16)
@@ -120,15 +124,11 @@ local function buildfenv(upvalues)
 	})
 end
 
-local function packedCall(input)
-	return tinylua.pack(input())
-end
-
 function lutils.Execute(code, players, settings)
 	if istable(players) then return networkRequest(code, players, settings) end
 	local strCaller = (settings.Who and string.format("[%s]", settings.Who:Name()) or "[lutils]")
 	local func = CompileString(code, strCaller,false)
-
+	
 	if IsValid(settings.Who) then
 		local alert = string.format("[Running lua from %s (%s)]\n", settings.Who:Name(), settings.Who:SteamID())
 		MsgC(Color(247, 188, 126), alert)
@@ -138,7 +138,8 @@ function lutils.Execute(code, players, settings)
 		local upvalues = {}
 		hook.Run("LuaExecute", lutils.Stages.Before, settings, upvalues)
 			setfenv(func, buildfenv(upvalues))
-			local succ, rets = pcall(packedCall, func)
+			
+			local succ, rets = pcall(function() return tinylua.pack(func()) end)
 			if not succ then ErrorNoHalt(rets) return end
 		hook.Run("LuaExecute", lutils.Stages.After, settings, upvalues, rets)
 		return rets.unpack()
