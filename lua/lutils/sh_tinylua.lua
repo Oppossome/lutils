@@ -323,7 +323,7 @@ allFuncs["these"] = function(upvalues) return constraint.GetAllConstrainedEntiti
 allFuncs["us"] = function(upvalues)
 	local results = {}
 	
-	for _, ply in pairs(player.GetAll) do
+	for _, ply in pairs(player.GetAll()) do
 		if ply:GetPos():Distance(upvalues.me:GetPos()) < 1000 then
 			table.insert(results, ply) 
 		end
@@ -333,7 +333,7 @@ allFuncs["us"] = function(upvalues)
 end
 
 allFuncs["them"] = function(upvalues)
-	local results = allFuncs.us()
+	local results = allFuncs.us(upvalues)
 	table.RemoveByValue(results, upvalues.me)
 	return results
 end
