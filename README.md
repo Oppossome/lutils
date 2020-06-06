@@ -3,4 +3,4 @@
 
 #### Purpose
 ------------
-A development utility made for my personal development server to make the process of testing thing much more easy.
+A tool for simplifying the development process
