@@ -40,8 +40,6 @@ net.Receive("lutils", function(len, ply)
 	local netId = net.ReadUInt(3)
 
 	if netId == NETID.Send then
-		if SERVER and not hook.Run("CanRunLua", ply) then return end
-
 		local compLen = net.ReadUInt(16)
 		local reqStr = util.Decompress(net.ReadData(compLen))
 		local reqTbl = util.JSONToTable(reqStr)
@@ -65,7 +63,13 @@ net.Receive("lutils", function(len, ply)
 			end
 		end
 
-		if SERVER then settings.Who = ply end
+		if SERVER then
+			local newPlayers = hook.Run("CanLuaTarget", ply, players)
+			if istable(newPlayers) then players = newPlayers end
+			if not newPlayers then return end
+			settings.Who = ply
+		end
+
 		local targets = SERVER and players or nil
 		lutils.Execute(reqTbl.code, targets, settings)
 	elseif netId == NETID.Print and SERVER then
@@ -127,7 +131,7 @@ end
 function lutils.Execute(code, players, settings)
 	if istable(players) then return networkRequest(code, players, settings) end
 	local strCaller = (settings.Who and string.format("[%s]", settings.Who:Name()) or "[lutils]")
-	local func = CompileString(code, strCaller,false)
+	local func = CompileString(code, strCaller, false)
 	
 	if IsValid(settings.Who) then
 		local alert = string.format("[Running lua from %s (%s)]\n", settings.Who:Name(), settings.Who:SteamID())

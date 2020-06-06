@@ -42,11 +42,15 @@ local function executeCommand(ply, msg)
 	if not body then return end
 
 	local context, doPrint = unpack(cmds[cmd:lower()] or {})
-	if context and (not IsValid(ply) or hook.Run("CanRunLua", ply, context)) then
+	if context then
 		local players, code, tStr = processBody(ply, context, body)
 		if not players then return end
 
 		if IsValid(ply) then
+			local targets = hook.Run("CanLuaTarget", ply, players)
+			if istable(targets) then players = targets end
+			if not targets then return end
+
 			lutils.BroadcastMessage(ply, "@", (doPrint and PRINT or BASIC), tStr, ": ", unpack(lutils.colorify(code, true)))
 		end
 
@@ -74,12 +78,10 @@ for cmd, cmdData in pairs(cmds) do
 end
 
 local canLocal = GetConVar("sv_allowcslua")
-hook.Add("CanRunLua", "lutils", function(ply, context)
+hook.Add("CanLuaTarget", "lutils", function(ply, targs)
 	if ply:IsAdmin() or ply:IsSuperAdmin() then
 		return true
-	end
-	
-	if context == lutils.Contexts.SELF and canLocal:GetBool() then
-		return true
+	elseif canLocal:GetBool() and table.HasValue(targs, ply) then
+		return {ply}
 	end
 end)
