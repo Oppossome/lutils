@@ -1,4 +1,4 @@
-lutils.Contexts = {["SERVER"] = 0, ["CLIENT"] = 1, ["SHARED"] = 3, ["SELF"] = 4}
+lutils.Contexts = lutils.Enum("SERVER", "CLIENT", "SHARED", "SELF")
 
 local cmds = {
 	["pm2"] = {lutils.Contexts.SELF, true},

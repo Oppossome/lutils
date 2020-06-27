@@ -1,34 +1,25 @@
 tinylua = setmetatable({}, {__call = function(self, ...) return self.Wrap(...) end})
-local STORAGE = setmetatable({}, {__mode = "k"})
 local INTERNAL = {}
 local META = {}
 
 local function pack(...) -- Convenient argument packer
 	local len, tbl = select('#', ...), {...}
-	local packFuncs = {}
-
-	function packFuncs.unpack()
-		return unpack(tbl, 1, len)
-	end
-
-	function packFuncs.iter(func)
-		for i = 1, len do
-			func(i, tbl[i])
-		end
-	end
 
 	return setmetatable(tbl, {
-		__index = function(self, index) 
-			return packFuncs[index] or rawget(self, index)
-		end,
+		__index = {
+			["unpack"] = function()
+				return unpack(tbl, 1, len)
+			end,
+			["iter"] = function(func)
+				for i = 1, len do
+					func(i, tbl[i])
+				end
+			end
+		},
 		__call = function(...)
 			return len, tbl
 		end
 	})
-end
-
-local function getStorage(input)
-	return STORAGE[getmetatable(input)]
 end
 
 local function Wrap(input)
@@ -44,8 +35,7 @@ local function Wrap(input)
 		meta[ind] = val
 	end
 
-	STORAGE[key] = {}
-	meta.__metatable = key
+	meta.__metatable = {}
 	return setmetatable(values, meta)
 end
 
@@ -78,7 +68,7 @@ local function performCall(tbl, callback)
 	end
 
 	local result = Wrap(results)
-	getStorage(result)["errors"] = errors
+	getmetatable(result)["errors"] = errors
 	return result
 end
 
@@ -214,7 +204,7 @@ function INTERNAL:IsValid()
 end
 
 function INTERNAL:errors()
-	return (getStorage(self).errors or {})
+	return (getmetatable(self).errors or {})
 end
 
 function INTERNAL:get()
