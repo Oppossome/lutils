@@ -79,11 +79,9 @@ end
 
 local canLocal = GetConVar("sv_allowcslua")
 hook.Add("CanLuaTarget", "lutils", function(ply, targs)
-	if ply:IsFullyAuthenticated() then
-		if ply:IsAdmin() or ply:IsSuperAdmin() then
-			return true
-		elseif canLocal:GetBool() and table.HasValue(targs, ply) then
-			return {ply}
-		end
+	if ply:IsFullyAuthenticated() and (ply:IsAdmin() or ply:IsSuperAdmin()) then
+		return true
+	elseif canLocal:GetBool() and table.HasValue(targs, ply) then
+		return {ply}
 	end
 end)
