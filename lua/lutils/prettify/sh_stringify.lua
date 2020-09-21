@@ -13,7 +13,7 @@ end
 
 function str.Table(input, minified)
 	local entries = table.Count(input)
-	
+
 	if minified or entries == 0 then
 		return string.format("{} --[[ %s ]]", input)
 	end
@@ -63,7 +63,7 @@ function str.Table(input, minified)
 	if entries ~= 0 then
 		result = result..string.format("\n  -- %s left...", entries)
 	end
-	
+
 
 	return result.."\n}"
 end
@@ -71,15 +71,15 @@ end
 function str.Entity(input, minified)
 	if minified and not IsValid(input) then return string.format("%s(NULL)", tostring(input):match("%[NULL (.-)%]")) end
 	if minified and input:IsPlayer() then return string.format("player.GetById(%s) --[[ %s, %s ]]", input:EntIndex(), input:Name(), input:SteamID()) end
-	if minified then return string.format("Entity(%s) --[[ %s, %s ]]", input:EntIndex(), input:GetClass(), input:GetModel() or "no model") end
+	if minified then return string.format("Entity(%s) --[[ %s ]]", input:EntIndex(), (input:GetModel() and ("%s, %s"):format(input:GetClass(), input:GetModel()) or input:GetClass())) end
 	if not IsValid(input) then return tostring(input) end
 
-	local comments = {input:GetClass(), input:GetModel() or "no model"}
+	local comments = {input:GetClass(), input:GetModel()}
 	local result = ""
 
-	if input:IsPlayer() then 
+	if input:IsPlayer() then
 		if SERVER then table.Add(comments, {input:IPAddress()}) end
-		table.Add(comments, {input:SteamID(), input:Name()}) 
+		table.Add(comments, {input:SteamID(), input:Name()})
 	end
 
 	for _, val in ipairs(comments) do
@@ -106,7 +106,7 @@ function str.Panel(input, minified)
 	result = result..string.format("\n--%s\n", childrenStr)
 	result = result..str.Table(input:GetChildren())
 
-	return result	
+	return result
 end
 
 local function getArgs(func)
@@ -143,9 +143,9 @@ function str.Function(input, minified)
 
 		local args = getArgs(input)
 		if info.isvararg then table.insert(args, "...") end
-		return string.format("function(%s)\t--[[ %s ]]", table.concat(args, ", "), location)		
+		return string.format("function(%s)\t--[[ %s ]]", table.concat(args, ", "), location)
 	end
-	
+
 	if info.short_src == "[C]" then
 		return str.Function(input, true)
 	end
@@ -171,12 +171,12 @@ function str.str(input, minified)
 	if isstring(input) then return string.format('"%s"', tostring(input)) end
 	if isvector(input) then return str.Vector(input) end
 	if IsColor(input) then return str.Color(input) end
-	
+
 	if isfunction(input) then return str.Function(input, minified) end
 	if IsEntity(input) then return str.Entity(input, minified) end
 	if ispanel(input) then return str.Panel(input, minified) end
 	if istable(input) then return str.Table(input, minified) end
-	
+
 	if input == nil then return "nil" end
 	return tostring(input)
 end

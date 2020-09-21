@@ -131,11 +131,11 @@ end
 local function buildParser(input)
 	if isfunction(input) then return input end
 	local argStr, funcStr = input:match("(.-)->(.+)")
-	
+
 	if argStr and funcStr then
 		local codeFull = string.format("return function(%s)\n%s\nend", argStr, tinylua.MakePrefix(funcStr))
 		local funcFactory = CompileString(codeFull, "funcfactory")
-		
+
 		if funcFactory then
 			return funcFactory()
 		end
@@ -229,7 +229,7 @@ function tinylua.FindEntity(input, upvalues)
 
 	local tinyFunc = allFuncs[input:match("^#(%a+)")]
 	if tinyFunc then return tinylua(tinyFunc(upvalues)) end
-	
+
 	local upvalue = upvalues[input:match("^#(%a+)")]
 	if upvalue and IsEntity(upvalue) then return upvalue end
 
@@ -276,7 +276,7 @@ function tinylua.BuildUpvalues(ply)
 	upvalues.there  = trace.HitPos
 	upvalues.length	= trace.StartPos:Distance(trace.HitPos)
 	upvalues.this	= trace.Entity
-	
+
 	return upvalues
 end
 
@@ -312,10 +312,10 @@ allFuncs["these"] = function(upvalues) return constraint.GetAllConstrainedEntiti
 
 allFuncs["us"] = function(upvalues)
 	local results = {}
-	
+
 	for _, ply in pairs(player.GetAll()) do
 		if ply:GetPos():Distance(upvalues.me:GetPos()) < 1000 then
-			table.insert(results, ply) 
+			table.insert(results, ply)
 		end
 	end
 
