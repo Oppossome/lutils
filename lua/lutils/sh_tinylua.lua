@@ -61,10 +61,8 @@ local function performCall(tbl, callback)
 	end
 
 	if table.Count(errors) == calls and calls ~= 0 then
-		for _, error in pairs(errors) do
-			MsgC(Color(235, 111, 111), "[tinylua] "..error)
-			break
-		end
+		local _, error = next(errors, nil)
+		MsgC(Color(235, 111, 111), "[tinylua] "..error)
 	end
 
 	local result = Wrap(results)
@@ -83,8 +81,12 @@ function META:__index(index)
 		local target = ent[index]
 
 		if isfunction(target) then
-			results[source] = function(_, ...)
-				return target(ent, ...)
+			results[source] = function(fArg, ...)
+				if fArg == self then
+					return target(ent, ...)
+				else
+					return target(fArg, ...)
+				end
 			end
 		else
 			results[source] = target
@@ -176,6 +178,12 @@ function INTERNAL:filter(input)
 	end)
 end
 
+function INTERNAL:flip()
+	return performCall(self, function(results, source, ent)
+		results[ent] = source
+	end)
+end
+
 function INTERNAL:set(vars, val)
 	vars = (istable(vars) and vars or {vars})
 	return performCall(self, function(results, source, ent)
@@ -215,6 +223,7 @@ end
 local allFuncs = {}
 
 local function compareString(str1, str2)
+	if #str1 > 3 and str1:lower():find(str2:lower()) then return true end
 	if str1:lower():sub(1, #str2) == str2:lower() then return true end
 	if str1:lower() == str2:lower() then return true end
 	return false
@@ -333,7 +342,7 @@ allFuncs["npcs"] = function()
 
 	for _, ent in pairs(ents.GetAll()) do
 		if ent:IsNPC() then
-			table.insert(results)
+			table.insert(results, ent)
 		end
 	end
 
