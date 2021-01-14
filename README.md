@@ -58,7 +58,7 @@ LUtils is a powerful [glua](https://wiki.facepunch.com/gmod) development utility
 | there |[Vector](https://wiki.facepunch.com/gmod/Vector) | TraceResult HitPos|
 | this |[Entity](https://wiki.facepunch.com/gmod/Entity)| Currently targeted entity|
 | `username` | [Player](https://wiki.facepunch.com/gmod/Player) | Player with the name|
-| _`entityID` | [Entity](https://wiki.facepunch.com/gmod/Entity) |
+| _`entityID` | [Entity](https://wiki.facepunch.com/gmod/Entity) | Entity with the entityID |
 
 ###### Examples
 - Kill your own player  
