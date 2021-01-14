@@ -12,10 +12,10 @@ LUtils is a powerful [glua](https://wiki.facepunch.com/gmod) development utility
 ### Execution Commands
 | Command | Context | Usage  |
 | ------------ | ------------ | ------------ |
-| !p `code` | Server | Executes code to print |
-| !ps `code` | Shared | Executes code on both self and server to print|
-| !pm `code` | Client  | Executes code on self to print |
-| !psc `targets`, `code` | Clients  | Excutes code on targets to print |
+| !p `code` | Server | Executes code then prints result |
+| !ps `code` | Shared | Executes code on both self and server then prints results |
+| !pm `code` | Client  | Executes code on self then prints result |
+| !psc `targets`, `code` | Clients  | Excutes code on targets then prints results |
 | !l `code`| Server | Executes code |
 | !ls `code` | Shared | Executes code on both self and server|
 | !lm `code`| Client | Executes code on self |
