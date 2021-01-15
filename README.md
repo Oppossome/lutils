@@ -115,7 +115,7 @@ Tinylua objects are able to be manipulated for higher granularity
 
 ##### :keys() - Get wrapped value of only table keys
 - Kill every player holding a crowbar  
-`all:GetActiveWeapon():GetClass():filter('x -> x == "weapon_crowbar"):keys():Kill()`
+`all:GetActiveWeapon():GetClass():filter('x -> x == "weapon_crowbar"'):keys():Kill()`
 
 ##### :errors() - Return table of every error in prior tinylua call
 - Get a table of every error caused by entities without physics objects  
