@@ -139,13 +139,6 @@ local function buildParser(input)
 		local funcFactory = CompileString(codeFull, "funcfactory")
 
 		if funcFactory then
-			for i = 0, 4 do
-				if getmetatable(getfenv(i)) then
-					setfenv(funcFactory, getfenv(i))
-					break
-				end
-			end
-
 			return funcFactory()
 		end
 	end
